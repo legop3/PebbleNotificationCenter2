@@ -53,6 +53,7 @@ class HistoryInserterImpl(
          MuteReason.SILENT_NOTIFICATION -> context.getString(R.string.reason_silent_notification)
          MuteReason.DO_NOT_DISTURB -> context.getString(R.string.reason_dnd)
          MuteReason.IDENTICAL_TEXT -> context.getString(R.string.reason_identical)
+         MuteReason.SCREEN_ON -> context.getString(R.string.reason_screen_on)
       }
    }
 

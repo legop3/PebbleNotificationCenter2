@@ -272,6 +272,17 @@ private fun ToolsScreenContent(
          }
 
          item(span = { GridItemSpan(maxLineSpan) }) {
+            SwitchPreference(
+               state.preferences[GlobalPreferenceKeys.muteScreenOn],
+               onValueChange = {
+                  updatePreference(GlobalPreferenceKeys.muteScreenOn, it)
+               },
+               title = { Text(stringResource(R.string.setting_mute_screen_on)) },
+               summary = { Text(stringResource(R.string.setting_mute_screen_on_description)) }
+            )
+         }
+
+         item(span = { GridItemSpan(maxLineSpan) }) {
             Text(
                stringResource(R.string.version, state.versionName),
                Modifier

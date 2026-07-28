@@ -15,6 +15,7 @@ import com.matejdro.pebblenotificationcenter.notification.model.ParsedNotificati
 import com.matejdro.pebblenotificationcenter.notification.model.PauseStatus
 import com.matejdro.pebblenotificationcenter.notification.model.ProcessedNotification
 import com.matejdro.pebblenotificationcenter.notification.model.any
+import com.matejdro.pebblenotificationcenter.notification.util.ScreenStateChecker
 import com.matejdro.pebblenotificationcenter.notification.utils.parseVibrationPattern
 import com.matejdro.pebblenotificationcenter.rules.GlobalPreferenceKeys
 import com.matejdro.pebblenotificationcenter.rules.MasterSwitch
@@ -40,6 +41,7 @@ class NotificationProcessor(
    private val globalPreferenceStore: DataStore<Preferences>,
    private val pauseController: PauseController,
    private val historyInserter: HistoryInserter,
+   private val screenStateChecker: ScreenStateChecker,
    @AndroidVersion
    private val androidVersion: Int,
 ) : NotificationRepository {
@@ -206,7 +208,9 @@ class NotificationProcessor(
          return MuteReason.APP_STARTUP to null
       }
 
-      if (globalPreferenceStore.data.first()[GlobalPreferenceKeys.muteWatch]) {
+      val globalPreferences = globalPreferenceStore.data.first()
+
+      if (globalPreferences[GlobalPreferenceKeys.muteWatch]) {
          logcat { "Not vibrating: watch muted" }
          return MuteReason.WATCH_MUTE to null
       }
@@ -239,6 +243,11 @@ class NotificationProcessor(
       if (identicalText && preferences[RuleOption.muteIdenticalNotifications]) {
          logcat { "Not vibrating: identical text notification" }
          return MuteReason.IDENTICAL_TEXT to null
+      }
+
+      if (globalPreferences[GlobalPreferenceKeys.muteScreenOn] && screenStateChecker.isScreenOn()) {
+         logcat { "Not vibrating: screen on" }
+         return MuteReason.SCREEN_ON to null
       }
 
       return null to pattern

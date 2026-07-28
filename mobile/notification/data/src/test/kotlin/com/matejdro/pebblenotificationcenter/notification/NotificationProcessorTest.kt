@@ -15,6 +15,7 @@ import com.matejdro.pebblenotificationcenter.notification.model.Action
 import com.matejdro.pebblenotificationcenter.notification.model.NativeAction
 import com.matejdro.pebblenotificationcenter.notification.model.ParsedNotification
 import com.matejdro.pebblenotificationcenter.notification.model.PauseStatus
+import com.matejdro.pebblenotificationcenter.notification.util.FakeScreenStateChecker
 import com.matejdro.pebblenotificationcenter.rules.FakeRulesRepository
 import com.matejdro.pebblenotificationcenter.rules.GlobalPreferenceKeys
 import com.matejdro.pebblenotificationcenter.rules.MasterSwitch
@@ -57,6 +58,7 @@ class NotificationProcessorTest {
 
    private val historyInserter = FakeHistoryInserter()
 
+   private val screenStateChecker = FakeScreenStateChecker()
    private val processor = NotificationProcessor(
       context,
       watchSyncer,
@@ -65,6 +67,7 @@ class NotificationProcessorTest {
       globalPreferences,
       pauseController,
       historyInserter,
+      screenStateChecker,
       androidVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM
    )
 
@@ -1437,6 +1440,7 @@ class NotificationProcessorTest {
          globalPreferences,
          pauseController,
          historyInserter,
+         screenStateChecker,
          androidVersion = Build.VERSION_CODES.N,
       )
 
@@ -1614,5 +1618,78 @@ class NotificationProcessorTest {
          subtitle shouldBe "stitle"
          body shouldBe "body"
       }
+   }
+
+   @Test
+   fun `It should vibrate when the mute on screen on is enabled but screen is not on`() = runTest {
+      globalPreferences.edit {
+         it[GlobalPreferenceKeys.muteScreenOn] = true
+      }
+      screenStateChecker.setIsScreenOn = false
+
+      val notification = ParsedNotification(
+         "key",
+         "com.app",
+         "Title",
+         "sTitle",
+         "Body",
+         // 19:18:25 GMT | Sunday, January 4, 2026
+         Instant.ofEpochSecond(1_767_554_305),
+         isSilent = false
+      )
+
+      processor.onNotificationPosted(notification)
+
+      openController.watchappOpened shouldBe true
+      processor.pollNextVibration().shouldNotBeNull()
+   }
+
+   @Test
+   fun `It should vibrate when the screen is on but mute on screen on is disabled`() = runTest {
+      globalPreferences.edit {
+         it[GlobalPreferenceKeys.muteScreenOn] = false
+      }
+      screenStateChecker.setIsScreenOn = true
+
+      val notification = ParsedNotification(
+         "key",
+         "com.app",
+         "Title",
+         "sTitle",
+         "Body",
+         // 19:18:25 GMT | Sunday, January 4, 2026
+         Instant.ofEpochSecond(1_767_554_305),
+         isSilent = false
+      )
+
+      processor.onNotificationPosted(notification)
+
+      openController.watchappOpened shouldBe true
+      processor.pollNextVibration().shouldNotBeNull()
+   }
+
+   @Test
+   fun `It should not vibrate when the mute on screen on is enabled and screen is on`() = runTest {
+      globalPreferences.edit {
+         it[GlobalPreferenceKeys.muteScreenOn] = true
+      }
+      screenStateChecker.setIsScreenOn = true
+
+      val notification = ParsedNotification(
+         "key",
+         "com.app",
+         "Title",
+         "sTitle",
+         "Body",
+         // 19:18:25 GMT | Sunday, January 4, 2026
+         Instant.ofEpochSecond(1_767_554_305),
+         isSilent = false
+      )
+
+      processor.onNotificationPosted(notification)
+
+      openController.watchappOpened shouldBe false
+      processor.pollNextVibration().shouldBeNull()
+      historyInserter.insertedEntries.shouldHaveSize(1).first().muteReason shouldBe MuteReason.SCREEN_ON
    }
 }

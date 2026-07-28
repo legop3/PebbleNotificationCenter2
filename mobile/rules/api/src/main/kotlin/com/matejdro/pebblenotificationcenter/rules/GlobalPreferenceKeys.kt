@@ -19,4 +19,6 @@ object GlobalPreferenceKeys {
    val turnOnBacklight = BooleanPreferenceKeyWithDefault("turn_on_backlight", false)
 
    val largeStatusBarFont = BooleanPreferenceKeyWithDefault("large_status_bar_font", false)
+
+   val muteScreenOn = BooleanPreferenceKeyWithDefault("mute_screen_on", false)
 }

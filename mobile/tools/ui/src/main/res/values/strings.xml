@@ -29,4 +29,6 @@
     <string name="setting_large_status_bar_font_description">Use a larger font for the clock in the watch status bar so the
         time is easier to read. Takes effect the next time a screen is opened on the watch.
     </string>
+    <string name="setting_mute_screen_on">Auto mute on screen on</string>
+    <string name="setting_mute_screen_on_description">Automatically mute NC when phone\'s screen is on - the watch will not pop up anything or vibrate while the phone\'s screen is on.</string>
 </resources>
