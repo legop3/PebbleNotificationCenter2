@@ -1,8 +1,5 @@
 package com.matejdro.pebblenotificationcenter.ui.lists
 
-import android.os.Build
-import android.os.VibrationEffect
-import android.os.Vibrator
 import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.MaterialTheme
@@ -20,11 +17,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.shadow.Shadow
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.core.content.getSystemService
 import com.mohamedrejeb.compose.dnd.reorder.ReorderContainer
 import com.mohamedrejeb.compose.dnd.reorder.ReorderableItem
 import com.mohamedrejeb.compose.dnd.reorder.rememberReorderState
@@ -46,7 +43,7 @@ fun <T> ReorderableListContainer(
    var reorderingList by remember(data) { mutableStateOf(data) }
    var dragging by remember { mutableStateOf(false) }
    val density = LocalDensity.current
-   val vibrator = LocalContext.current.getSystemService<Vibrator>()
+   val hapticFeedback = LocalHapticFeedback.current
    val coroutineScope = rememberCoroutineScope()
 
    var lastDragIndex by remember { mutableIntStateOf(-1) }
@@ -77,26 +74,13 @@ fun <T> ReorderableListContainer(
 
                   if (lastDragIndex != index) {
                      // Sometimes onDragEnter is called twice. Wrap in this check to ensure we don't vibrate twice
-                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        vibrator?.vibrate(
-                           VibrationEffect.createPredefined(
-                              if (dragging) {
-                                 VibrationEffect.EFFECT_TICK
-                              } else {
-                                 VibrationEffect.EFFECT_CLICK
-                              }
-                           )
-                        )
-                     } else {
-                        @Suppress("DEPRECATION")
-                        vibrator?.vibrate(
-                           if (dragging) {
-                              LEGACY_VIBRAITON_DURATION_REORDER_MS
-                           } else {
-                              LEGACY_VIBRAITON_DURATION_START_MS
-                           }
-                        )
-                     }
+                     hapticFeedback.performHapticFeedback(
+                        if (dragging) {
+                           HapticFeedbackType.SegmentTick
+                        } else {
+                           HapticFeedbackType.GestureThresholdActivate
+                        }
+                     )
                   }
                   dragging = true
                   lastDragIndex = index
@@ -111,12 +95,7 @@ fun <T> ReorderableListContainer(
                }
             },
             onDrop = { state ->
-               if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                  vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
-               } else {
-                  @Suppress("DEPRECATION")
-                  vibrator?.vibrate(LEGACY_VIBRAITON_DURATION_START_MS)
-               }
+               hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
 
                dragging = false
                lastDragIndex = -1
