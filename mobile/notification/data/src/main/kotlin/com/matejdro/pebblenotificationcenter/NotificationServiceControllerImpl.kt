@@ -46,9 +46,13 @@ class NotificationServiceControllerImpl : NotificationServiceController {
 
       pendingIntent as PendingIntent
 
-      pendingIntent.send()
-
-      return true
+      return try {
+         pendingIntent.send()
+         true
+      } catch (_: PendingIntent.CanceledException) {
+         logcat { "Pending intent cancelled" }
+         false
+      }
    }
 
    override fun triggerReplyAction(
@@ -71,13 +75,17 @@ class NotificationServiceControllerImpl : NotificationServiceController {
          ClipData.Item(remoteInputIntent)
       )
 
-      pendingIntent.send(
-         service,
-         0,
-         Intent().apply { this.clipData = clipData }
-      )
-
-      return true
+      return try {
+         pendingIntent.send(
+            service,
+            0,
+            Intent().apply { this.clipData = clipData }
+         )
+         true
+      } catch (_: PendingIntent.CanceledException) {
+         logcat { "Pending intent cancelled" }
+         false
+      }
    }
 
    override fun getNotificationChannels(pkg: String): List<LightNotificationChannel> {
