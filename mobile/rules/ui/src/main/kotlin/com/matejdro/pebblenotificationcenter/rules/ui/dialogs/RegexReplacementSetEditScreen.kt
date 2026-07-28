@@ -121,12 +121,12 @@ private fun RegexReplacementSetScreenContent(
                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                   Text("•", Modifier.padding(end = 8.dp))
 
-                  SelectionContainer {
-                     Column(
-                        Modifier
-                           .weight(1f)
-                           .padding(end = 8.dp)
-                     ) {
+                  SelectionContainer(
+                     Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp)
+                  ) {
+                     Column {
                         Text(entry.first)
                         Text(entry.second)
                      }
@@ -200,11 +200,14 @@ private fun AddNewDialog(
 @FullScreenPreviews
 internal fun RegexReplacementSetScreenPreview() {
    PreviewTheme {
+      val reallyLongString = "Long ".repeat(100)
+
       Box {
          RegexReplacementSetScreenContent(
             listOf(
                "Replace A" to "With A",
-               "Long long replace B" to "Long long with B"
+               "Long long replace B" to "Long long with B",
+               reallyLongString to reallyLongString,
             ),
             {},
             {},
