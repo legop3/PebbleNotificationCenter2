@@ -159,8 +159,14 @@ class NotificationService : NotificationListenerService() {
             return null
          }
 
-         getNotificationChannels(sbn.packageName, Process.myUserHandle()).firstOrNull {
-            it.id == sbn.notification.channelId
+         try {
+            getNotificationChannels(sbn.packageName, Process.myUserHandle()).firstOrNull {
+               it.id == sbn.notification.channelId
+            }
+         } catch (_: SecurityException) {
+            // If user only granted regular notification permission, not companion device access, we end up here.
+            // Fail gracefully.
+            null
          }
       } else {
          null
