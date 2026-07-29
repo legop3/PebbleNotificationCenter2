@@ -27,9 +27,6 @@ import com.mohamedrejeb.compose.dnd.reorder.ReorderableItem
 import com.mohamedrejeb.compose.dnd.reorder.rememberReorderState
 import kotlinx.coroutines.launch
 
-private const val LEGACY_VIBRAITON_DURATION_REORDER_MS = 25L
-private const val LEGACY_VIBRAITON_DURATION_START_MS = 100L
-
 @Composable
 fun <T> ReorderableListContainer(
    data: List<T>,
