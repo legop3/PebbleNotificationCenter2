@@ -79,6 +79,7 @@ class NotificationService : NotificationListenerService() {
    }
 
    override fun onListenerConnected() {
+      logcat { "Listener connected. Already bound: $bound" }
       super.onListenerConnected()
 
       if (bound) {
@@ -96,6 +97,12 @@ class NotificationService : NotificationListenerService() {
       }
 
       controlListenerHintsAndOpenOnReconnect()
+   }
+
+   override fun onListenerDisconnected() {
+      logcat { "Listener disconnected" }
+
+      super.onListenerDisconnected()
    }
 
    suspend fun reloadAllNotifications() {
